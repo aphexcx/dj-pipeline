@@ -1,13 +1,38 @@
 package cx.aphex.dj_pipeline
 
+
 import ealvatag.audio.AudioFileIO
 import ealvatag.tag.FieldKey
 import ealvatag.tag.NullTag
 import java.io.File
 
+val VALID_EXTENSIONS: Array<String> = arrayOf(
+        "mp3", "aif", "aiff"
+)
 
-fun processFile(pathname: String) {
-    val audioFile = AudioFileIO.read(File(pathname))
+fun main(args: Array<String>) {
+    args.forEach {
+        val file = File(it)
+        when {
+            !file.exists() -> return@forEach
+            file.isDirectory -> processDirectory(file)
+            else -> processFile(file)
+        }
+    }
+//    processFile("/Users/afik_cohen/IdeaProjects/dj-pipeline/Andy Moor, Diana Leah, Somna - There Is Light (Extended Mix).aiff")
+}
+
+private fun String.isValidExtension(): Boolean = this in VALID_EXTENSIONS
+
+fun processDirectory(dir: File) {
+    dir.walkBottomUp().forEach { processFile(it) }
+}
+
+fun processFile(file: File) {
+    if (!file.extension.isValidExtension()) {
+        return
+    }
+    val audioFile = AudioFileIO.read(file)
 
     val tag = audioFile.tag.or(NullTag.INSTANCE)
     if (tag == NullTag.INSTANCE) { // there was no tag
@@ -18,7 +43,8 @@ fun processFile(pathname: String) {
     val sharpKey = tag.getValue(FieldKey.KEY).or("")
     val energyLevel = getEnergyLevel(tag.getValue(FieldKey.GROUPING).or(""))
     if (!comment.contains("-")) {
-        throw Exception("Comment tag not formatted in camelotKey - bpm format (or already processed): [$comment] %s".format(audioFile.file))
+        println("ERROR: Comment tag not formatted in camelotKey - bpm format (or already processed): [$comment] %s".format(audioFile.file))
+        return
     }
     getCamelotKeyAndBpm(comment).let { (camelotKey, bpm) ->
         val newComment = makeComment(
@@ -49,16 +75,11 @@ private fun makeComment(
 ): String =
         "$camelotKey $sharpKey $bpm E$energyLevel"
 
-// Make camelot keys double digit, e.g. 1A -> 01A, 2B -> 02B, 11A -> 11A
+// Make camelot keys double digit, e.g. 1A -> 01A, 2B -> 02B, 11A -> 11A 4B/2A -> 04B/02A
 private fun makeCamelotKeyDoubleDigit(comment: String): String {
-    val regex = """^(\d)A|B""".toRegex()
+    val regex = """(\d+)(A|B)""".toRegex()
     return regex.replace(comment) {
-        "0" + it.value
+        val (digits, rest) = it.destructured
+        String.format("%02d", digits.toInt()) + rest
     }
-}
-
-
-fun main(args: Array<String>) {
-//    args.forEach { processFile(it) }
-    processFile("/Users/afik_cohen/IdeaProjects/dj-pipeline/Andy Moor, Diana Leah, Somna - There Is Light (Extended Mix).aiff")
 }
