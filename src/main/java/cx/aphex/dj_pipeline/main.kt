@@ -10,6 +10,8 @@ val VALID_EXTENSIONS: Array<String> = arrayOf(
         "mp3", "aif", "aiff"
 )
 
+private fun String.isValidExtension(): Boolean = this in VALID_EXTENSIONS
+
 fun main(args: Array<String>) {
     args.forEach {
         val file = File(it)
@@ -19,10 +21,7 @@ fun main(args: Array<String>) {
             else -> processFile(file)
         }
     }
-//    processFile("/Users/afik_cohen/IdeaProjects/dj-pipeline/Andy Moor, Diana Leah, Somna - There Is Light (Extended Mix).aiff")
 }
-
-private fun String.isValidExtension(): Boolean = this in VALID_EXTENSIONS
 
 fun processDirectory(dir: File) {
     dir.walkBottomUp().forEach { processFile(it) }
@@ -34,28 +33,41 @@ fun processFile(file: File) {
     }
     val audioFile = AudioFileIO.read(file)
 
+    print("${audioFile.file} ")
+
     val tag = audioFile.tag.or(NullTag.INSTANCE)
     if (tag == NullTag.INSTANCE) { // there was no tag
-        throw Exception("No id3 tag present in %s".format(audioFile.file))
+        throw Exception("❌ No id3 tag present in %s".format(audioFile.file))
     }
 
-    val comment = tag.getValue(FieldKey.COMMENT).or("")
-    val sharpKey = tag.getValue(FieldKey.KEY).or("")
-    val energyLevel = getEnergyLevel(tag.getValue(FieldKey.GROUPING).or(""))
+    val comment = tag.getValue(FieldKey.COMMENT).orNull()
+            ?: throw MissingTagFieldException(FieldKey.COMMENT)
+    val sharpKey = tag.getValue(FieldKey.KEY).orNull()
+            ?: throw MissingTagFieldException(FieldKey.KEY)
+    // Rekordbox doesn't actually write bpm to id3. Maybe figure out a different way to get rekordbox's bpm
+//    val rekordboxBpm = tag.getValue(FieldKey.BPM).orNull()?.toDouble()
+//            ?: throw MissingTagFieldException(FieldKey.BPM)
+
+    val energyLevel = getEnergyLevel(tag.getValue(FieldKey.GROUPING).orNull()
+            ?: throw MissingTagFieldException(FieldKey.GROUPING)
+    )
     if (!comment.contains("-")) {
-        println("ERROR: Comment tag not formatted in camelotKey - bpm format (or already processed): [$comment] %s".format(audioFile.file))
+        println("🚸 WARN: Comment tag not formatted in camelotKey - bpm format (or already processed): \"$comment\"")
         return
     }
     getCamelotKeyAndBpm(comment).let { (camelotKey, bpm) ->
         val newComment = makeComment(
                 makeCamelotKeyDoubleDigit(camelotKey),
-                sharpKey.padEnd(3),
+                sharpKey,
                 bpm,
                 energyLevel)
         tag.setField(FieldKey.COMMENT, newComment)
         audioFile.save()
+        println("✅")
     }
 }
+
+class MissingTagFieldException(fieldKey: FieldKey) : Exception("❌ ERROR: Missing tag field: [$fieldKey]")
 
 private fun getEnergyLevel(grouping: String): Int {
     return grouping.split("-").first().trim().toInt()
@@ -66,14 +78,14 @@ private fun getCamelotKeyAndBpm(comment: String): Pair<String, Double> =
         comment.split("-").map { it.trim() }.let { (camelotKey, bpmString) -> camelotKey to bpmString.toDouble() }
 
 // Makes a comment in the form:
-// 03A A#m 128 E7
+// 03A 128 E7 A#m
 private fun makeComment(
         camelotKey: String,
         sharpKey: String,
         bpm: Double,
         energyLevel: Int
 ): String =
-        "$camelotKey $sharpKey $bpm E$energyLevel"
+        "$camelotKey ${"%.0f".format(bpm)} E$energyLevel $sharpKey"
 
 // Make camelot keys double digit, e.g. 1A -> 01A, 2B -> 02B, 11A -> 11A 4B/2A -> 04B/02A
 private fun makeCamelotKeyDoubleDigit(comment: String): String {
