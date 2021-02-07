@@ -7,7 +7,7 @@ import java.time.format.DateTimeFormatter
 
 val beginning = LocalTime.MIN //  LocalTime.parse("00:00",timeStampFormatter)
 val dateformatter = DateTimeFormatter.ofPattern("H:mm:ss")
-val shiftBy = "0:02:52"
+val shiftBy = "0:08:11"
 val shiftByTime = LocalTime.parse(shiftBy, dateformatter)
 
 fun main(args: Array<String>) {
@@ -19,7 +19,7 @@ fun main(args: Array<String>) {
         val timestamp = splitLine.last()
 
         val timestampTime = LocalTime.parse(timestamp, dateformatter)
-        val shiftedTime = timestampTime.plus(Duration.between(beginning, shiftByTime))
+        val shiftedTime = timestampTime.minus(Duration.between(beginning, shiftByTime))
 
         shiftedLines.add("${splitLine.dropLast(1).joinToString(" ")} ${shiftedTime.format(dateformatter)}")
     }

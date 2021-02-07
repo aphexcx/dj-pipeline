@@ -10,7 +10,7 @@ val VALID_EXTENSIONS: Array<String> = arrayOf(
         "mp3", "aif", "aiff"
 )
 
-private fun String.isValidExtension(): Boolean = this in VALID_EXTENSIONS
+fun String.isValidExtension(): Boolean = this in VALID_EXTENSIONS
 
 fun main(args: Array<String>) {
     args.forEach {
