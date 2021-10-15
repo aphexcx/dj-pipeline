@@ -5,6 +5,7 @@ import ealvatag.audio.AudioFileIO
 import ealvatag.tag.FieldKey
 import ealvatag.tag.NullTag
 import java.io.File
+import java.util.*
 
 fun main(args: Array<String>) {
     args.forEach {
@@ -47,9 +48,9 @@ object deemixProcessor {
             println("🚸 Only one artist here, skipping: \"$artist\"")
             return
         }
-        var ampersandArtist: String? = artists.filter { it.contains('&') }.maxBy { it.length }
+        var ampersandArtist: String? = artists.filter { it.contains('&') }.maxByOrNull { it.length }
         if (ampersandArtist == null) {
-            ampersandArtist = artists.filter { it.contains("feat.") }.maxBy { it.length }
+            ampersandArtist = artists.filter { it.contains("feat.") }.maxByOrNull { it.length }
         }
 
         if (ampersandArtist == null) {
@@ -63,7 +64,9 @@ object deemixProcessor {
                 newArtists.add(ampersandArtist)
                 continue
             }
-            if (!ampersandArtist.toLowerCase().contains(a.toLowerCase())) {
+            if (!ampersandArtist.lowercase(Locale.getDefault())
+                    .contains(a.lowercase(Locale.getDefault()))
+            ) {
                 newArtists.add(a)
             }
         }

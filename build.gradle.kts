@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     java
-    kotlin("jvm") version "1.3.72"
+    kotlin("jvm") version "1.5.31"
 }
 
 group = "cx.aphex"
@@ -13,10 +13,10 @@ repositories {
 }
 
 dependencies {
-    implementation(kotlin("stdlib-jdk8"))
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.5.31")
     testImplementation("junit", "junit", "4.12")
 
-    implementation("com.ealva", "ealvatag", "0.4.3")
+    implementation("com.ealva", "ealvatag", "0.4.6")
 
 }
 

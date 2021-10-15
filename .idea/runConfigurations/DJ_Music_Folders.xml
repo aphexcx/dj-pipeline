@@ -1,6 +1,11 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="DJ Music Folders" type="JetRunConfigurationType">
+    <option name="ALTERNATIVE_JRE_PATH" value="$USER_HOME$/.sdkman/candidates/java/current" />
+    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+    <option name="MAIN_CLASS_NAME" value="cx.aphex.dj_pipeline.MainKt" />
     <module name="dj-pipeline.main" />
+    <option name="PROGRAM_PARAMETERS" value="&quot;$USER_HOME$/Dropbox/DJ/AIFF/Afik/&quot; &quot;$USER_HOME$/Dropbox/DJ/MP3/Afik/&quot;" />
+    <shortenClasspath name="NONE" />
     <extension name="net.ashald.envfile">
       <option name="IS_ENABLED" value="false" />
       <option name="IS_SUBST" value="false" />
@@ -11,13 +16,6 @@
         <ENTRY IS_ENABLED="true" PARSER="runconfig" />
       </ENTRIES>
     </extension>
-    <option name="VM_PARAMETERS" value="" />
-    <option name="PROGRAM_PARAMETERS" value="&quot;$USER_HOME$/Dropbox/DJ/AIFF/Afik/&quot; &quot;$USER_HOME$/Dropbox/DJ/MP3/Afik/&quot;" />
-    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
-    <option name="ALTERNATIVE_JRE_PATH" value="1.8 (2)" />
-    <option name="PASS_PARENT_ENVS" value="true" />
-    <option name="MAIN_CLASS_NAME" value="cx.aphex.dj_pipeline.MainKt" />
-    <option name="WORKING_DIRECTORY" value="" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>
